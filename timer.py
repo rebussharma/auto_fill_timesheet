@@ -218,7 +218,7 @@ def find_add_time_field(driver):
 
         if get_weekday_name() == weekday and get_today_day() == day:
             parent_id = i.get_attribute("id")
-            box_number = parent_id[-1]
+            box_number = parent_id[parent_id.rindex('_')+1:]
             input_field_id = 'd_r1_' + box_number
             return input_field_id
 
@@ -277,10 +277,11 @@ def final_submit(driver):
 
 if __name__ == '__main__':
 
-    input("All open chrome windows need to be manually close to proceed.\n"
-          "Press any key and(or) enter to continue after closing open windows:")
+    input("All open chrome windows need to be manually closed to proceed.\n"
+          "Press any key and(or) 'enter' to continue after closing open windows:")
     if check_if_weekend():
-        print("TODAY IS WEEKEND, SO NO TIMESHEET :)")
+        print("TODAY IS WEEKEND, SO NO TIMESHEET :)\nExiting")
+        time.sleep(2)
     else:
         if check_if_national_holiday(get_last_day()):
             print("TODAY IS A NATIONAL HOLIDAY, PLEASE MANUALLY UPDATE TIME-SHEET")
