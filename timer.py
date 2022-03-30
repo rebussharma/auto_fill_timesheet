@@ -176,10 +176,9 @@ def open_chrome():
     print("opening google chrome")
     options = Options()
     options.add_argument("start-maximized")
-    options.add_argument("--user-data-dir=C:\\Users\\RibashSharma\\AppData\\Local\\Google\\Chrome\\User Data")
+    options.add_argument("--user-data-dir=C:\\Users\\YourUser\\AppData\\Local\\Google\\Chrome\\User Data")
     options.page_load_strategy = 'normal'
-    driver = webdriver.Chrome(service=Service('C:\\Users\\RibashSharma\\.wdm\\drivers\\chromedriver\\win32\\99.0.4844'
-                                              '.51\\chromedriver.exe'), options=options)
+    driver = webdriver.Chrome(service=Service('Path to Chrome Driver\\chromedriver.exe'), options=options)
     print("navigating to timesheet")
     driver.get("https://aptive.unanet.biz/aptive/action/home")
     time.sleep(5)
