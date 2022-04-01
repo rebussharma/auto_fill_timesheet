@@ -1,3 +1,4 @@
+import selenium.common.exceptions
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options
@@ -9,7 +10,7 @@ from datetime import date, datetime
 import os
 
 
-def get_weekday_name():
+def get_today_weekday_name():
     """
         Get name of the day: Monday, ... , Sunday
     :return: name of the day
@@ -136,6 +137,10 @@ def end_period():
         return True
     return False
 
+def begin_period():
+    if get_today_day() == 1 or get_today_day() == 16:
+        return True
+    return False
 
 def check_if_national_holiday(today):
     """
@@ -176,17 +181,27 @@ def open_chrome():
     print("opening google chrome")
     options = Options()
     options.add_argument("start-maximized")
-    options.add_argument("--user-data-dir=C:\\Users\\YourUser\\AppData\\Local\\Google\\Chrome\\User Data")
+    options.add_argument("--user-data-dir=C:\\Users\\RibashSharma\\AppData\\Local\\Google\\Chrome\\User Data")
     options.page_load_strategy = 'normal'
-    driver = webdriver.Chrome(service=Service('Path to Chrome Driver\\chromedriver.exe'), options=options)
+    driver = webdriver.Chrome(service=Service('C:\\Users\\RibashSharma\\.wdm\\drivers\\chromedriver\\win32\\99.0.4844'
+                                              '.51\\chromedriver.exe'), options=options)
     print("navigating to timesheet")
     driver.get("https://aptive.unanet.biz/aptive/action/home")
     time.sleep(5)
     return driver
 
 
-# def check_active_timesheets():
-# TODO needs to be done later
+# if today is new period, create new timesheet
+def click_create_timesheet_button(driver):
+    print("Adding New Time Sheet")
+    css_selector = "img[src='/aptive/images/add.png']"
+    WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, css_selector))).click()
+    time.sleep(3)
+
+def save_new_timesheet(driver):
+    button_save = driver.find_element(By.ID, "button_save")
+    button_save.click()
+    time.sleep(1)
 
 # def add_timesheet_if_not_active():
 # TODO needs to be done later
@@ -208,17 +223,31 @@ def find_add_time_field(driver):
     :param driver: driver instance of opened chrome
     :return:
     """
-    print("finding right box to input time")
+    '''
+        find all the spans with class type dow or dom
+           and returns its parent element w/ class hours weekly
+    '''
     e = (driver.find_elements(by=By.XPATH, value="//span[@class='dow' or @class='dom']/parent::th["
                                                  "@class='hours-weekday']"))
+
+    '''
+    Objective is to find the 'id' of the element that has PROJECT CODE
+    Once that id is found, the id has row number in it. We get the row number and edit the hour field in the row
+    '''
+    #
+    row_to_edit = driver.find_element(by=By.XPATH, value="//input[contains(@value, 'C_IBM 1034_S_IBM_')]")
+    row_to_edit_id = row_to_edit.get_attribute('id')
+    print(row_to_edit_id)
+    row_number = row_to_edit_id[-1]
+
     for i in e:
         weekday = i.text[:3]
         day = int(i.text[3:])
 
-        if get_weekday_name() == weekday and get_today_day() == day:
+        if get_today_weekday_name() == weekday and get_today_day() == day:
             parent_id = i.get_attribute("id")
             box_number = parent_id[parent_id.rindex('_')+1:]
-            input_field_id = 'd_r1_' + box_number
+            input_field_id = 'd_r' + row_number + '_' + box_number
             return input_field_id
 
     return -1
@@ -286,7 +315,13 @@ if __name__ == '__main__':
             print("TODAY IS A NATIONAL HOLIDAY, PLEASE MANUALLY UPDATE TIME-SHEET")
         else:
             chrome_driver = open_chrome()
-            click_edit_button(chrome_driver)
+            # if today is first day of the month OR 16th day of the month, start a new time sheet
+            if begin_period:
+                click_create_timesheet_button(chrome_driver)
+                save_new_timesheet(chrome_driver)
+            else:
+                click_edit_button(chrome_driver)
+
             input_field_id = find_add_time_field(chrome_driver)
             if input_field_id != -1:
                 add_time(chrome_driver, input_field_id)
