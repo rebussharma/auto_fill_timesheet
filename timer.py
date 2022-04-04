@@ -137,10 +137,16 @@ def end_period():
         return True
     return False
 
+
 def begin_period():
+    """
+        check if today is the day to start a new time sheet
+    :return: True if today is 1st day or 16th day of month
+    """
     if get_today_day() == 1 or get_today_day() == 16:
         return True
     return False
+
 
 def check_if_national_holiday(today):
     """
@@ -198,10 +204,12 @@ def click_create_timesheet_button(driver):
     WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, css_selector))).click()
     time.sleep(3)
 
+
 def save_new_timesheet(driver):
     button_save = driver.find_element(By.ID, "button_save")
     button_save.click()
     time.sleep(1)
+
 
 # def add_timesheet_if_not_active():
 # TODO needs to be done later
@@ -246,7 +254,7 @@ def find_add_time_field(driver):
 
         if get_today_weekday_name() == weekday and get_today_day() == day:
             parent_id = i.get_attribute("id")
-            box_number = parent_id[parent_id.rindex('_')+1:]
+            box_number = parent_id[parent_id.rindex('_') + 1:]
             input_field_id = 'd_r' + row_number + '_' + box_number
             return input_field_id
 
@@ -316,7 +324,7 @@ if __name__ == '__main__':
         else:
             chrome_driver = open_chrome()
             # if today is first day of the month OR 16th day of the month, start a new time sheet
-            if begin_period:
+            if begin_period():
                 click_create_timesheet_button(chrome_driver)
                 save_new_timesheet(chrome_driver)
             else:
