@@ -6,7 +6,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import time
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import os
 
 
@@ -143,9 +143,17 @@ def begin_period():
         check if today is the day to start a new time sheet
     :return: True if today is 1st day or 16th day of month
     """
-    if get_today_day() == 1 or get_today_day() == 16:
-        return True
-    return False
+    # 0M 1T 2W 3TR 4FR 5S 6SN
+    week_number = date.today().weekday()
+    yesterday = (datetime.today() - timedelta(1)).day
+    day_bef_yesterday = (datetime.today() - timedelta(2)).day
+    if week_number == 0: # if today is Monday and 1 or 16 were in weekend
+        if yesterday == 1 or day_bef_yesterday == 1 or yesterday == 16 or day_bef_yesterday == 16:
+            return True
+    else:
+        if get_today_day() == 1 or get_today_day() == 16:
+            return True
+        return False
 
 
 def check_if_national_holiday(today):
