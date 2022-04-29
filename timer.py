@@ -5,6 +5,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 import time
 from datetime import date, datetime, timedelta
 import os
@@ -122,6 +123,7 @@ def get_last_day():
         Last day is needed to see if pay-period ends for this month this day
     :return: return last day number for current month
     """
+
     if is_leap_year(get_today_year()) and get_today_month() == 2:
         return 29
     return last_days_of_months().get(get_today_month())
@@ -133,8 +135,17 @@ def end_period():
             If yes, timesheet needs to be submitted!
     :return: True if today is end-period else false
     """
-    if get_today_day() == 15 or get_today_day() == get_last_day():
-        return True
+
+    week_number = date.today().weekday()
+    tomorrow = (datetime.today() + timedelta(1)).day
+    day_after_tomorrow = (datetime.today() + timedelta(2)).day
+
+    if week_number == 4: # if today's week number is 4 i.e Friday
+        if tomorrow == get_last_day() or day_after_tomorrow == get_last_day():
+            return True
+    else:
+        if get_today_day() == 15 or get_today_day() == get_last_day():
+            return True
     return False
 
 
@@ -147,7 +158,7 @@ def begin_period():
     week_number = date.today().weekday()
     yesterday = (datetime.today() - timedelta(1)).day
     day_bef_yesterday = (datetime.today() - timedelta(2)).day
-    if week_number == 0: # if today is Monday and 1 or 16 were in weekend
+    if week_number == 0:  # if today is Monday and 1 or 16 were in weekend
         if yesterday == 1 or day_bef_yesterday == 1 or yesterday == 16 or day_bef_yesterday == 16:
             return True
     else:
@@ -187,18 +198,18 @@ def close_all_chrome():
     os.system("taskkill /im chrome.exe /f")
 
 
-def open_chrome():
+def open_chrome(path):
     """
         Opens a new instance of Google Chrome and navigates to timesheet url
     :return: chrome driver instance
     """
+
     print("opening google chrome")
     options = Options()
     options.add_argument("start-maximized")
     options.add_argument("--user-data-dir=C:\\Users\\RibashSharma\\AppData\\Local\\Google\\Chrome\\User Data")
     options.page_load_strategy = 'normal'
-    driver = webdriver.Chrome(service=Service('C:\\Users\\RibashSharma\\.wdm\\drivers\\chromedriver\\win32\\99.0.4844'
-                                              '.51\\chromedriver.exe'), options=options)
+    driver = webdriver.Chrome(service=Service(path), options=options)
     print("navigating to timesheet")
     driver.get("https://aptive.unanet.biz/aptive/action/home")
     time.sleep(5)
@@ -330,7 +341,8 @@ if __name__ == '__main__':
         if check_if_national_holiday(get_last_day()):
             print("TODAY IS A NATIONAL HOLIDAY, PLEASE MANUALLY UPDATE TIME-SHEET")
         else:
-            chrome_driver = open_chrome()
+            driver_path = "C:\\Users\\RibashSharma\\.wdm\\drivers\\chromedriver\win32\\101.0.4951.41\\chromedriver.exe"
+            chrome_driver = open_chrome(driver_path)
             # if today is first day of the month OR 16th day of the month, start a new time sheet
             if begin_period():
                 click_create_timesheet_button(chrome_driver)
