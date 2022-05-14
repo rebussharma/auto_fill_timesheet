@@ -139,7 +139,7 @@ def end_period():
     day_after_tomorrow = (datetime.today() + timedelta(2)).day
 
     if week_number == 4: # if today's week number is 4 i.e Friday
-        if tomorrow == get_last_day() or day_after_tomorrow == get_last_day():
+        if tomorrow == get_last_day() or day_after_tomorrow == get_last_day() or tomorrow == 15 or day_after_tomorrow == 15:
             return True
     else:
         if get_today_day() == 15 or get_today_day() == get_last_day():
