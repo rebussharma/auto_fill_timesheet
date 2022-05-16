@@ -156,13 +156,13 @@ def begin_period():
     week_number = date.today().weekday()
     yesterday = (datetime.today() - timedelta(1)).day
     day_bef_yesterday = (datetime.today() - timedelta(2)).day
-    if week_number == 0:  # if today is Monday and 1 or 16 were in weekend
-        if yesterday == 1 or day_bef_yesterday == 1 or yesterday == 16 or day_bef_yesterday == 16:
-            return True
+    if get_today_day() == 1 or get_today_day() == 16:
+        return True
     else:
-        if get_today_day() == 1 or get_today_day() == 16:
-            return True
-        return False
+        if week_number == 0:  # if today is Monday and 1 or 16 were in weekend
+            if yesterday == 1 or day_bef_yesterday == 1 or yesterday == 16 or day_bef_yesterday == 16:
+                return True
+    return False
 
 
 def check_if_national_holiday(today):
